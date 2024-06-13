@@ -1,31 +1,36 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
+import 'package:mobile_app/features/screens/main_screen/bloc/connection_bloc.dart';
 
-Widget bigButton(LoginBloc loginBloc, TextEditingController usernameController,
-    TextEditingController passwordController) {
+Widget connectionSelectorButton(
+    ConnectionBloc connBloc, String connectionType) {
+  final String title = connectionType;
+
+  if (title != 'Bluetooth' && title != 'Wifi') {
+    throw 'Connection type not supported: $connectionType';
+  }
+
   return ElevatedButton(
     onPressed: () async {
-      if (usernameController.text.isEmpty || passwordController.text.isEmpty) {
-        throw Exception('Username or password is empty');
-      }
       final completer = Completer();
-      loginBloc.add(TryLogin(
-          completer: completer,
-          login: usernameController.text,
-          password: passwordController.text));
+      if (connectionType == 'Bluetooth') {
+        connBloc.add(ConnectBluetooth(completer: completer));
+      } else if (connectionType == 'Wifi') {
+        connBloc.add(ConnectWifi(completer: completer));
+      }
       return completer.future;
     },
     style: ElevatedButton.styleFrom(
       shape: const StadiumBorder(),
       padding: const EdgeInsets.symmetric(vertical: 15),
     ),
-    child: const SizedBox(
+    child: SizedBox(
         width: double.infinity,
         child: Text(
-          "Sign in",
+          title,
           textAlign: TextAlign.center,
-          style: TextStyle(fontSize: 20, color: Colors.black),
+          style: const TextStyle(fontSize: 20, color: Colors.black),
         )),
   );
 }
